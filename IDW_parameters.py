@@ -6,26 +6,37 @@ Created on Sun Mar 25 17:52:37 2018
 parámetros del script
 """
 
-# potencia a la que se eleva el método idw
-power = 2
+"""potencia a la que se eleva la función de interpolación
+   (valor fuertemente recomendado 2)"""
+POWER = 2
 
-# bases de datos de datos y huecos
-DB = r'E:\WORK\CHS\aemet\out\AEMET_CHS.accdb'
-# DB = r'C:\Users\solis\Documents\aemet\DB\AEMET_CHS.accdb'
+"""distancia máxima hasta la cual el valor interpolado es igual a la de la
+   estación con dato"""
+DIST_MIN = 1.
 
-# voids in P series: select que busca en DB las estaciones y fechas sin datos
-select_v = """SELECT Estaciones.X, Estaciones.Y, P_voids.ID, P_voids.FECHA
-    FROM Estaciones INNER JOIN P_voids ON Estaciones.ID = P_voids.ID
-    WHERE P_voids.FECHA=#1/1/1965#
-    ORDER BY P_voids.FECHA"""
+"""base de dato con las estaciones con datos y huecos"""
+# DB = r'E:\WORK\CHS\aemet\out\AEMET_CHS.accdb'
+DB = r'C:\Users\solis\Documents\aemet\DB\AEMET_CHS.accdb'
 
-# data in P series: select to retrieve data for each fecha
-select_d = """SELECT Estaciones.X, Estaciones.Y, P.P
-    FROM Estaciones INNER JOIN P ON Estaciones.ID = P.ID
+"""voids in P series: select que busca en DB las estaciones y fechas sin datos
+   este select es especifico de la serie que se quiere rellenar y debe estar
+   ordenado por fecha"""
+SELECT_V = """SELECT Estaciones.X, Estaciones.Y, P_voids.ID, P_voids.FECHA
+             FROM Estaciones INNER JOIN P_voids ON Estaciones.ID = P_voids.ID
+             WHERE P_voids.FECHA>=#1/1/1965#
+             ORDER BY P_voids.FECHA;"""
+
+"""data in P series: select to retrieve data for each fecha
+   Al igual que el anterior es específico de la serie que se quiere rellenar"""
+SELECT_D = """SELECT Estaciones.X, Estaciones.Y, PD.P
+    FROM Estaciones INNER JOIN PD ON Estaciones.ID = PD.ID
     WHERE FECHA=?"""
 
-# directorio de resultados
-dir_out = r'E:\WORK\CHS\aemet\out'
+"""Tamaño del bufer para escribir el fichero de resultados"""
+BUFSIZE = 1024000
 
-# P results: name file
-fpout = 'p_idw.txt'
+"""directorio de resultados"""
+DIR_OUT = r'E:\WORK\CHS\aemet\out'
+
+"""Nombre delfichero de resultados"""
+F_OUT = 'p_idw.txt'
