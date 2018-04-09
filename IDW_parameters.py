@@ -6,30 +6,37 @@ Created on Sun Mar 25 17:52:37 2018
 parámetros del script
 """
 
-power = 2
+"""potencia a la que se eleva la función de interpolación
+   (valor fuertemente recomendado 2)"""
+POWER = 2
 
-# bases de datos de datos y huecos
+"""distancia máxima hasta la cual el valor interpolado es igual a la de la
+   estación con dato"""
+DIST_MIN = 1.
+
+"""base de dato con las estaciones con datos y huecos"""
 # DB = r'E:\WORK\CHS\aemet\out\AEMET_CHS.accdb'
-DB = r'C:\Users\solis\Documents\aemet\DB\AEMET_CHS.accdb'
+DB = r'C:\Users\solil\Documents\BBDD\AEMET_CHS\AEMET_CHS.accdb'
 
-# relleno de huevos de P
-# select que busca en DB_VOIDS las estaciones y fechas sin datos
-select_v = """SELECT Estaciones.C_X, Estaciones.C_Y, P_voids.ID, P_voids.FECHA
-    FROM Estaciones INNER JOIN P_voids ON Estaciones.ID = P_voids.ID
-    WHERE P_voids.FECHA=#1/1/1965#
-    ORDER BY P_voids.FECHA"""
+"""voids in P series: select que busca en DB las estaciones y fechas sin datos
+   este select es especifico de la serie que se quiere rellenar y debe estar
+   ordenado por fecha"""
+SELECT_V = """SELECT Estaciones.X, Estaciones.Y, P_voids.ID, P_voids.FECHA
+             FROM Estaciones INNER JOIN P_voids ON Estaciones.ID = P_voids.ID
+             WHERE P_voids.FECHA>=#1/1/1965#
+             ORDER BY P_voids.FECHA, P_voids.ID;"""
 
-select_d = """SELECT Estaciones.C_X, Estaciones.C_Y, P.P
-    FROM Estaciones INNER JOIN P ON Estaciones.ID = P.ID
+"""data in P series: select to retrieve data for each fecha
+   Al igual que el anterior es específico de la serie que se quiere rellenar"""
+SELECT_D = """SELECT Estaciones.X, Estaciones.Y, PD.P
+    FROM Estaciones INNER JOIN PD ON Estaciones.ID = PD.ID
     WHERE FECHA=?"""
 
-dir_data = r'E:\WORK\CHS\aemet\out'
+"""Tamaño del bufer para escribir el fichero de resultados"""
+BUFSIZE = 1024000
 
-# fichero de huecos de cada estacion (ID, FECHA)
-# debe estar ordenado por fechas
-fvoids = 'p_voids.txt'
+"""directorio de resultados"""
+DIR_OUT = r'C:\Users\solil\Documents\BBDD\AEMET_CHS'
 
-# directorio de datos
-dir_out = dir_data
-
-fout = 'p_interpolated.txt'
+"""Nombre delfichero de resultados"""
+F_OUT = 'p_idw.txt'
