@@ -11,11 +11,11 @@ import logging
 if __name__ == "__main__":
 
     try:
-        from IDW import rellenar_huecos
+        from IDW import fill_voids_idw_quadrants
 
-        rellenar_huecos()
+        fill_voids_idw_quadrants()
 
-        print('fin ok', end=' ')
+        print('proceso terminado', end=' ')
     except Exception as e:
         logging.error(traceback.format_exc())
     finally:
