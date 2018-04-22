@@ -220,11 +220,15 @@ def write_2_file(fo, codv, fecha, values):
         fo.write('{0}\t{1}\t{2:.0f}\n'.format(codv[i],
                  fecha.strftime('%d/%m/%Y'), values[i]))
 
+
 def rango_fechas(start, stop, step = 1):
     """
     generador de fechas entre start y stop con un paso de tiempo de un día
     """
-    from datetime import timedelta
+    from datetime import datetime, timedelta
+    start = datetime.strptime(start, '%d/%m/%Y')
+    stop = datetime.strptime(stop, '%d/%m/%Y')
+
     if stop <= start:
         raise ValueError("start must be smaller than stop")
 
@@ -250,15 +254,13 @@ def fill_scatter_idw_quadrants():
     fo = open(join(par.DIR_OUT, par.F_OUT), 'w', par.BUFSIZE)
     foi = open(join(par.DIR_OUT, FILE_INCIDENCIAS), 'w', par.BUFSIZE)
 
-    points = np.loadtxt(par.FILE_POINTS, delimiter='\t')
+    xyp = np.loadtxt(par.FILE_POINTS, delimiter='\t', usecols=[1,2],
+                     dtype='float64')
+    codp = np.loadtxt(par.FILE_POINTS, delimiter='\t', usecols=[0],
+                     dtype='int32')
+    codp = codp.tolist()
 
-    rows = [[line.split(',')] for line in lines]
-    xyp = np.array([[row[1].strip(), row[2].strip()] for row in rows],
-                     dtype=np.float64)
-    codp = [row[0] for row in rows]
-
-    a = db_con_str.con_str(par.DB)
-    con = pyodbc.connect(a)
+    con = pyodbc.connect(db_con_str.con_str(par.DB))
 
     for i, fecha in enumerate(rango_fechas(par.FECHA_INICIAL,
                                            par.FECHA_FINAL)):
