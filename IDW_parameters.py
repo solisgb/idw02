@@ -16,12 +16,12 @@ DIST_MIN = 1.
 
 """Número mínimo de puntos con datos en todo el dominio en una fecha para
 interpolar (no confundir con el número mínimo de datos para interpolar una
-estación sin dato en una determinada fecha""" 
+estación sin dato en una determinada fecha"""
 NUM_MIN_DATA_POINTS = 2
 
 """base de dato con las estaciones con datos y huecos"""
-# DB = r'E:\WORK\CHS\aemet\out\AEMET_CHS.accdb'
-DB = r'C:\Users\solil\Documents\BBDD\AEMET_CHS\AEMET_CHS.accdb'
+DB = r'C:\Users\solis\Documents\aemet\DB\AEMET_CHS.accdb'
+# DB = r'C:\Users\solil\Documents\BBDD\AEMET_CHS\AEMET_CHS.accdb'
 
 """voids in P series: select que busca en DB las estaciones y fechas sin datos
    este select es especifico de la serie que se quiere rellenar y debe estar
@@ -41,7 +41,7 @@ SELECT_D = """SELECT Estaciones.X, Estaciones.Y, PD.VALUE
 BUFSIZE = 1024000
 
 """directorio de resultados"""
-DIR_OUT = r'C:\Users\solil\Documents\BBDD\AEMET_CHS'
+DIR_OUT = r'C:\Users\solis\Documents\aemet\DB\out'
 
 """Nombre delfichero de resultados"""
 F_OUT = 'p_idw.txt'
