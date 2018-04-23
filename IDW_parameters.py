@@ -20,7 +20,8 @@ estación sin dato en una determinada fecha"""
 NUM_MIN_DATA_POINTS = 2
 
 """base de dato con las estaciones con datos y huecos"""
-DB = r'C:\Users\solis\Documents\aemet\DB\AEMET_CHS.accdb'
+DB = r'\\ESMUR0001\hidrogeologia\BBDD\AEMET_CHS\AEMET_CHS.accdb'
+# DB = r'C:\Users\solis\Documents\aemet\DB\AEMET_CHS.accdb'
 # DB = r'C:\Users\solil\Documents\BBDD\AEMET_CHS\AEMET_CHS.accdb'
 
 """voids in P series: select que busca en DB las estaciones y fechas sin datos

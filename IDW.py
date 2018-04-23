@@ -18,8 +18,9 @@ The parameters of the script are accesible importing de module IDW_parameters
 import numpy as np
 from scipy import spatial
 import pyodbc
-import IDW_parameters as par
 
+"""Precisión números reales. Puede ser 'float64' o 'float32'"""
+PREC_REAL_NUMBER = 'float64'
 
 def fill_voids_idw_quadrants():
     """
@@ -32,9 +33,10 @@ def fill_voids_idw_quadrants():
        y otro lista xyv de las coornadas de los puntos sin datos xyv
     4. cuando cambia la fecha llamo a la función data_in_fecha
     """
-    import db_con_str
     from os.path import join
     from math import fmod
+    import IDW_parameters as par
+    import db_con_str
 
     FILE_INCIDENCIAS = 'idw_indicencias.txt'
     NUM = 100
@@ -42,8 +44,7 @@ def fill_voids_idw_quadrants():
     fo = open(join(par.DIR_OUT, par.F_OUT), 'w', par.BUFSIZE)
     foi = open(join(par.DIR_OUT, FILE_INCIDENCIAS), 'w', par.BUFSIZE)
 
-    a = db_con_str.con_str(par.DB)
-    con = pyodbc.connect(a)
+    con = pyodbc.connect(db_con_str.con_str(par.DB))
     cur = con.cursor()
     cur.execute(par.SELECT_V)
     row = cur.fetchone()
@@ -58,9 +59,10 @@ def fill_voids_idw_quadrants():
             codv.append(row.ID)
             xyv.append([row.X, row.Y])
         else:
-            xyd, z = select_data(con, fecha)
+            xyd, z = select_data(con, fecha, par.SELECT_D)
             if len(z) != 0:
-                fill_fecha(fo, fecha, codv, xyv, xyd, z)
+                fill_fecha(fo, fecha, codv, xyv, xyd, z, par.POWER,
+                           par.DIST_MIN)
                 if fmod(i, NUM) == 0.0:
                     print('{}'.format(fecha.strftime('%d/%m/%Y')))
             else:
@@ -71,9 +73,9 @@ def fill_voids_idw_quadrants():
             codv = [row.ID]
             xyv = [[row.X, row.Y]]
 
-    xyd, z = select_data(con, fecha)
+    xyd, z = select_data(con, fecha, par.SELECT_D)
     if len(z) != 0:
-        fill_fecha(fo, fecha, codv, xyv, xyd, z)
+        fill_fecha(fo, fecha, codv, xyv, xyd, z, par.POWER, par.DIST_MIN)
         print('{}'.format(fecha.strftime('%d/%m/%Y')))
     else:
         a = 'El {} no hay datos'.format(fecha.strftime('%d/%m/%Y'))
@@ -89,26 +91,26 @@ def fill_voids_idw_quadrants():
     foi.close()
 
 
-def select_data(con, fecha):
+def select_data(con, fecha, str_select):
     """
     argumentos
     con: conexión a la DB abierta en fill_voids_idw_quadrants
-    fecha: en la que se seleccionan los datos. SELECT_D debe tener un
-        where CAMPO_FECHA=?
+    fecha: en la que se seleccionan
+    str_select. SELECT_D debe tener un where CAMPO_FECHA=?
     return
     xyd: array 2D con las coordenadas de los puntos con datos
     z: array 1D con el valor de la variable en cada punto con dato
     """
     cur = con.cursor()
-    cur.execute(par.SELECT_D, fecha)
+    cur.execute(str_select, fecha)
     rows = [row for row in cur]
-    xyd = np.array([[row.X, row.Y] for row in rows], dtype='float64')
-    z = np.array([row.VALUE for row in rows], dtype='float64')
+    xyd = np.array([[row.X, row.Y] for row in rows], PREC_REAL_NUMBER)
+    z = np.array([row.VALUE for row in rows], PREC_REAL_NUMBER)
     cur.close()
     return xyd, z
 
 
-def fill_fecha(fo, fecha, codv, xyv, xyd, z):
+def fill_fecha(fo, fecha, codv, xyv, xyd, z, power, dist_min):
     """
     argumentos
     fecha: un type(date) en la que hay puntos sin datos
@@ -117,12 +119,12 @@ def fill_fecha(fo, fecha, codv, xyv, xyd, z):
     xyd: array 2D de las coordenadas de los puntos con dato
     z: array 1D con los valores de la variable en cada xyd
     """
-    xyva = np.array(xyv, dtype=np.float64)
+    xyva = np.array(xyv, PREC_REAL_NUMBER)
     tree = spatial.cKDTree(xyd)
     dist, ii = tree.query(xyva, k=xyd.shape[0])
     iqp = quadrants(xyva, xyd)
     selected_dist, selected_z = select_points_2_idw(dist, ii, z, iqp)
-    values = idw(selected_dist, selected_z, par.POWER, par.DIST_MIN)
+    values = idw(selected_dist, selected_z, power, dist_min)
     write_2_file(fo, codv, fecha, values)
 
 
@@ -181,12 +183,10 @@ def select_points_2_idw(dist, ii, z, iqp):
                 s1_dist.append(dist[i, j])
                 m = ii[i, j]
                 s1_z.append(z[m])
-                if iq.sum() == 0:
-                    selected_dist.append(np.array(s1_dist, np.float32))
-                    selected_z.append(np.array(s1_z, np.float32))
+                if iq.sum() == 4:
                     break
-            selected_dist.append(np.array(s1_dist, np.float32))
-            selected_z.append(np.array(s1_z, np.float32))
+        selected_dist.append(np.array(s1_dist, PREC_REAL_NUMBER))
+        selected_z.append(np.array(s1_z, PREC_REAL_NUMBER))
 
     return selected_dist, selected_z
 
@@ -202,7 +202,7 @@ def idw(d, z, power, dist_min):
     """
     if len(d) != len(z):
         raise ValueError('d and z have different elements number')
-    values = np.empty([len(d)], dtype=np.float32)
+    values = np.empty([len(d)], PREC_REAL_NUMBER)
     for i in range(len(d)):
         if d[i][0] <= dist_min:
             values[i] = z[i][0]
@@ -255,7 +255,7 @@ def fill_scatter_idw_quadrants():
     foi = open(join(par.DIR_OUT, FILE_INCIDENCIAS), 'w', par.BUFSIZE)
 
     xyp = np.loadtxt(par.FILE_POINTS, delimiter='\t', usecols=[1,2],
-                     dtype='float64')
+                     dtype=PREC_REAL_NUMBER)
     codp = np.loadtxt(par.FILE_POINTS, delimiter='\t', usecols=[0],
                      dtype='int32')
     codp = codp.tolist()
@@ -264,7 +264,7 @@ def fill_scatter_idw_quadrants():
 
     for i, fecha in enumerate(rango_fechas(par.FECHA_INICIAL,
                                            par.FECHA_FINAL)):
-        xyd, z = select_data(con, fecha)
+        xyd, z = select_data(con, fecha, par.SELECT_D)
         if z.size == 0:
             a = 'El {} no hay datos'.format(fecha.strftime('%d/%m/%Y'))
             print(a)
