@@ -14,13 +14,19 @@ POWER = 2
    estación con dato"""
 DIST_MIN = 1.
 
+"""Número mínimo de puntos con datos en todo el dominio en una fecha para
+interpolar (no confundir con el número mínimo de datos para interpolar una
+estación sin dato en una determinada fecha"""
+NUM_MIN_DATA_POINTS = 2
+
 """base de dato con las estaciones con datos y huecos"""
-# DB = r'E:\WORK\CHS\aemet\out\AEMET_CHS.accdb'
-DB = r'C:\Users\solil\Documents\BBDD\AEMET_CHS\AEMET_CHS.accdb'
+DB = r'\\ESMUR0001\hidrogeologia\BBDD\AEMET_CHS\AEMET_CHS.accdb'
+# DB = r'C:\Users\solis\Documents\aemet\DB\AEMET_CHS.accdb'
+# DB = r'C:\Users\solil\Documents\BBDD\AEMET_CHS\AEMET_CHS.accdb'
 
 """voids in P series: select que busca en DB las estaciones y fechas sin datos
    este select es especifico de la serie que se quiere rellenar y debe estar
-   ordenado por fecha"""
+   ordenado por fecha. El formato de fecha de Access es '#mm/dd/aaaa#'"""
 SELECT_V = """SELECT Estaciones.X, Estaciones.Y, P_voids.ID, P_voids.FECHA
              FROM Estaciones INNER JOIN P_voids ON Estaciones.ID = P_voids.ID
              WHERE P_voids.FECHA>=#1/1/1965#
@@ -28,7 +34,7 @@ SELECT_V = """SELECT Estaciones.X, Estaciones.Y, P_voids.ID, P_voids.FECHA
 
 """data in P series: select to retrieve data for each fecha
    Al igual que el anterior es específico de la serie que se quiere rellenar"""
-SELECT_D = """SELECT Estaciones.X, Estaciones.Y, PD.P
+SELECT_D = """SELECT Estaciones.X, Estaciones.Y, PD.VALUE
     FROM Estaciones INNER JOIN PD ON Estaciones.ID = PD.ID
     WHERE FECHA=?"""
 
@@ -36,7 +42,7 @@ SELECT_D = """SELECT Estaciones.X, Estaciones.Y, PD.P
 BUFSIZE = 1024000
 
 """directorio de resultados"""
-DIR_OUT = r'C:\Users\solil\Documents\BBDD\AEMET_CHS'
+DIR_OUT = r'C:\Users\solis\Documents\aemet\DB\out'
 
 """Nombre delfichero de resultados"""
 F_OUT = 'p_idw.txt'
