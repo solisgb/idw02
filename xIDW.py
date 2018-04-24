@@ -32,7 +32,13 @@ if __name__ == "__main__":
             print('IDW: Interpolate scatter points')
             fill_scatter_idw_quadrants()
 
-        print('The script took {0} seconds'.format(time.time()-startTime))
+        xtime = time.time()-startTime
+        if xtime < 60.0:
+            units = 'seconds'
+        else:
+            units = 'minutes'
+            xtime = xtime / 60.0
+        print('The script took {0} {1}'.format(xtime, units))
         print('Results in {}'.format(DIR_OUT))
     except Exception as e:
         logging.error(traceback.format_exc())

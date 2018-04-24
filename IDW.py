@@ -214,7 +214,8 @@ def idw(d, z, power, dist_min):
 
 def write_2_file(fo, codv, fecha, values):
     """
-    print codv, values to file
+    escribe en el fichero de resultados los valores interpolados
+    argumentos print codv, values to file
     """
     for i in range(len(codv)):
         fo.write('{0}\t{1}\t{2:.0f}\n'.format(codv[i],

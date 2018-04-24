@@ -22,16 +22,16 @@ NUM_MIN_DATA_POINTS = 2
 FECHA_INICIAL = '01/10/1985'
 
 """fecha final de la interpolación formato dd/mm/aaaa"""
-FECHA_FINAL = '01/12/1985'
+FECHA_FINAL = '01/10/2017'
 
 """base de dato con las estaciones con datos. Las series de datos en la
    DB puede tener huecos"""
 # DB = r'C:\Users\solis\Documents\aemet\DB\AEMET_CHS.accdb'
-DB = r'\\ESMUR0001\hidrogeologia\BBDD\AEMET_CHS\AEMET_CHS.accdb'
+DB = r'C:\Users\solil\Documents\BBDD\AEMET_CHS\AEMET_CHS.accdb'
 
 """select to retrieve data for each fecha de DB"""
-SELECT_D = """SELECT Estaciones.X, Estaciones.Y, TMAXD.VALUE
-    FROM Estaciones INNER JOIN TMAXD ON Estaciones.ID = TMAXD.ID
+SELECT_D = """SELECT Estaciones.X, Estaciones.Y, PD.VALUE
+    FROM Estaciones INNER JOIN PD ON Estaciones.ID = PD.ID
     WHERE FECHA=?"""
 
 """fichero de texto con las coordenadas de los puntos en los que se desea
@@ -48,4 +48,4 @@ BUFSIZE = 1024000
 DIR_OUT = r'C:\Users\solil\Documents\TMP'
 
 """Nombre delfichero de resultados"""
-F_OUT = 'TMAX_scatter_idw.txt'
+F_OUT = 'PD_scatter_idw.txt'
